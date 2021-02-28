@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -18,46 +19,102 @@ namespace Web
     {
 
         [WebMethod]
-        public object ValidateLogin(string user, string password)
+        public Response ValidateLogin(string user, string password)
         {
-            object response = null;
+            Response response = new Response();
             try
             {
                 if(user == "q@a.com" && password=="123")
                 {
-                    response = new
+                    response.Success = true;
+                    response.Data = new
                     {
-                        success = true,
-                        data = new  {
-                            name = "Rogelio 133",
-                            lastName = "Pacheco Elorza",
-                            token = "123456789",
-                        },
-                        
-                        message = "Datos incorrectos"
+                        name = "Rogelio 133",
+                        lastName = "Pacheco Elorza",
+                        token = "123456789",
                     };
                 }
                 else
                 {
-                    response = new
-                    {
-                        success = false,
-                        message = "Datos incorrectos"
-                    };
+                    response.Success = false;
+                    response.Message = "Datos incorrectos";
+                   
                 }
-
-               
             }
             catch (Exception ex)
             {
-                response = new {
-                    success = false,
-                    message = "No se pudo procesar su solicitud"
-                };
-                 
+                response.Success = false;
+                response.Message = "No se pudo procesar su solicitud";
+
             }
 
             return response;
         }
+
+        [WebMethod]
+        public object GetQuestionnaire(string token, int ID)
+        {
+            Response response = new Response();
+            try
+            {
+                response.TokenOK = isValidToken(token);
+                if (response.TokenOK)
+                {
+                    Questionnaire questionnaire = null;
+                    if(questionnaire != null)
+                    {
+                        response.Success = true;
+                        response.Data = new
+                        {
+                            questionnaireID = 515//questionnaire.ID
+                        };
+                    }
+                    
+                }
+
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "No se pudo procesar su solicitud";
+            }
+
+            return response;
+        }
+        [WebMethod]
+        public object SaveQuestionnaire(string token, Questionnaire questionnaire)
+        {
+            Response response = new Response();
+            try
+            {
+                response.TokenOK = isValidToken(token);
+                if (response.TokenOK)
+                {
+                    //guardar cuestionario
+                    response.Data = new
+                    {
+                        questionnaireID = 515//questionnaire.ID
+                    };
+                }
+
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "No se pudo procesar su solicitud";
+            }
+
+            return response;
+        }
+
+        private bool isValidToken( string token)
+        {
+            return token == "123456789";
+
+        }
+
+
     }
 }
