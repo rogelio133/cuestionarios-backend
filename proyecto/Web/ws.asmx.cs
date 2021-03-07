@@ -1,5 +1,6 @@
 ﻿using Business;
 using Entities;
+using Entities.custom;
 using Entities.response;
 using System;
 using System.Collections.Generic;
@@ -26,21 +27,20 @@ namespace Web
             Response response = new Response();
             try
             {
-                if (user == "q@a.com" && password == "123")
+                User userLogged = UserBusiness.ValidateLogin(user, password);
+
+                if (user == null)
+                    response.Message = "Datos incorrectos";
+                else if (userLogged.IDStatus == (int)Enums.UserStatus.Disabled)
+                    response.Message = "Su cuenta esta inactiva";
+                else
                 {
                     response.Success = true;
                     response.Data = new
                     {
-                        name = "Rogelio 133",
-                        lastName = "Pacheco Elorza",
-                        token = "123456789",
+                        name = userLogged.Name,
+                        token = userLogged.Token,
                     };
-                }
-                else
-                {
-                    response.Success = false;
-                    response.Message = "Datos incorrectos";
-
                 }
             }
             catch (Exception ex)
@@ -59,7 +59,7 @@ namespace Web
             Response response = new Response();
             try
             {
-                response.TokenOK = isValidToken(token);
+                response.TokenOK = UserBusiness.isValidToken(token);
                 if (response.TokenOK)
                 {
                     questionnaire item = QuestionnaireBusiness.getQuestionnaire(id);
@@ -88,7 +88,7 @@ namespace Web
             Response response = new Response();
             try
             {
-                response.TokenOK = isValidToken(token);
+                response.TokenOK = UserBusiness.isValidToken(token);
                 if (response.TokenOK)
                 {
                     List<questionnaire> items = QuestionnaireBusiness.getQuestionnaires();
@@ -114,7 +114,7 @@ namespace Web
             Response response = new Response();
             try
             {
-                response.TokenOK = isValidToken(token);
+                response.TokenOK = UserBusiness.isValidToken(token);
                 if (response.TokenOK)
                 {
                     //guardar cuestionario
@@ -124,6 +124,23 @@ namespace Web
                     };
                 }
 
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "No se pudo procesar su solicitud";
+            }
+
+            return response;
+        }
+
+        [WebMethod]
+        public object SaveQuestionnaireAnswer(QuestionnaireAnswer answer)
+        {
+            Response response = new Response();
+            try
+            {
                 response.Success = true;
             }
             catch (Exception ex)
@@ -162,11 +179,7 @@ namespace Web
             return response;
         }
 
-        private bool isValidToken(string token)
-        {
-            return token == "123456789";
-
-        }
+        
 
 
     }

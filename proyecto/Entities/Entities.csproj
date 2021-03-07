@@ -40,14 +40,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="custom\Enums.cs" />
     <Compile Include="Option.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Question.cs" />
     <Compile Include="Questionnaire.cs" />
+    <Compile Include="QuestionnaireAnswer.cs" />
+    <Compile Include="QuestionnaireAnswersDetail.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="response\option.cs" />
     <Compile Include="response\question.cs" />
     <Compile Include="response\questionnaire.cs" />
+    <Compile Include="User.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

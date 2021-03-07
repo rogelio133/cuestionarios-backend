@@ -100,7 +100,7 @@ namespace Business
 
             List<questionnaire> lista = new List<questionnaire> 
             {
-                respuesta,respuesta
+                respuesta
             };
 
             return lista;
@@ -121,8 +121,10 @@ namespace Business
                     Code = "133515",
                     Questions = new List<Question>
                 {
-                    new Question {ID=1,Name="Pregunta 1",Options= new List<Option> { new Option { ID=1,Name="Opcion 1", Correct= false },new Option { ID=2,Name="Opcion 2", Correct= false },new Option { ID=3,Name="Opcion 3", Correct= true },  }},
-                    new Question {ID=2,Name="Pregunta 2",Options= new List<Option> { new Option { ID=1,Name="Opcion a", Correct= false },new Option { ID=2,Name="Opcion b", Correct= false },new Option { ID=3,Name="Opcion c", Correct= true },  }}
+                    new Question {ID=1,Name="Pregunta 1",Options= new List<Option> { new Option { ID=10,Name="Opcion 1", Correct= false },new Option { ID=11,Name="Opcion 2", Correct= false },new Option { ID=13,Name="Opcion 3", Correct= true },  }},
+                    new Question {ID=2,Name="Pregunta 2",Options= new List<Option> { new Option { ID=20,Name="Opcion a", Correct= false },new Option { ID=21,Name="Opcion b", Correct= false },new Option { ID=23,Name="Opcion c", Correct= true },  }},
+                    new Question {ID=3,Name="Pregunta 3",Options= new List<Option> { new Option { ID=30,Name="Opcion x", Correct= false },new Option { ID=31,Name="Opcion y", Correct= false },new Option { ID=33,Name="Opcion z", Correct= true },  }}
+
                 }
                 };
 
