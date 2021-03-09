@@ -91,7 +91,7 @@ namespace Web
                 response.TokenOK = UserBusiness.isValidToken(token);
                 if (response.TokenOK)
                 {
-                    List<questionnaire> items = QuestionnaireBusiness.getQuestionnaires();
+                    List<questionnaire> items = QuestionnaireBusiness.getQuestionnaires(token);
 
                     response.Success = true;
                     response.Data = items;
@@ -117,10 +117,10 @@ namespace Web
                 response.TokenOK = UserBusiness.isValidToken(token);
                 if (response.TokenOK)
                 {
-                    //guardar cuestionario
+                    QuestionnaireBusiness.Save(questionnaire, token);
                     response.Data = new
                     {
-                        questionnaireID = 515//questionnaire.ID
+                        questionnaireID = questionnaire.IDQuestionnaire
                     };
                 }
 

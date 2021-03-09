@@ -18,6 +18,10 @@ namespace Business
 
             return token;
         }
+        public static int GetIDUser(string token)
+        {
+            return UserData.GetIDUser(token);
+        }
 
         public static bool isValidToken(string token)
         {
@@ -39,5 +43,7 @@ namespace Business
 
             return user;
         }
+
+        
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Entities;
-using Entities.response;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,12 +8,12 @@ using System.Text;
 
 namespace Data
 {
-    public static class UserData
+    public static class QuestionnaireData
     {
-        public static void SaveToken(int IDUser, string token)
-
+        public static List<Questionnaire> GetQuestionnaires(int iDUser)
         {
-            var query = "[dbo].[usp_saveUserToken_UPT]";
+            var query = "[dbo].[usp_QuestionnairesByUser_GET]";
+            List<Questionnaire> questionnaires = new List<Questionnaire>();
             try
             {
 
@@ -29,10 +28,10 @@ namespace Data
                     };
                     using (command.Connection)
                     {
-                        command.Parameters.Add("@pIDUser", SqlDbType.Int).Value = IDUser;
-                        command.Parameters.Add("@pToken", SqlDbType.VarChar).Value = token;
+                        command.Parameters.Add("@piDUser", SqlDbType.VarChar).Value = iDUser;
 
-                        command.ExecuteScalar();
+                        var reader = command.ExecuteReader();
+                        questionnaires = Converter<Questionnaire>.ConvertDataSetToList(reader);
                     }
                 }
 
@@ -41,13 +40,12 @@ namespace Data
             {
                 throw ex;
             }
+
+            return questionnaires;
         }
-
-        public static int GetIDUser(string token)
-
+        public static void Save(Questionnaire item, DataTable dtQuestions, DataTable dtOptions)
         {
-            var query = "[dbo].[usp_IDUserByToken_GET]";
-            int IDUser = 0;
+            var query = "[dbo].[usp_SaveQuestionnaire_INS]";
             try
             {
 
@@ -62,9 +60,14 @@ namespace Data
                     };
                     using (command.Connection)
                     {
-                        command.Parameters.Add("@pToken", SqlDbType.VarChar).Value = token;
+                        command.Parameters.Add("@pIDUser", SqlDbType.Int).Value = item.IDUser;
+                        command.Parameters.Add("@pName", SqlDbType.VarChar).Value = item.Name;
+                        command.Parameters.Add("@pCode", SqlDbType.VarChar).Value = item.Code;
+                        command.Parameters.Add("@pNoQuestions", SqlDbType.Int).Value = item.NoQuestions;
+                        command.Parameters.Add("@pDTQuestions", SqlDbType.Structured).Value = dtQuestions;
+                        command.Parameters.Add("@pDTOptions", SqlDbType.Structured).Value = dtOptions;
 
-                        IDUser = Convert.ToInt32( command.ExecuteScalar());
+                        item.IDQuestionnaire = Convert.ToInt32( command.ExecuteScalar());
                     }
                 }
 
@@ -74,16 +77,13 @@ namespace Data
                 throw ex;
             }
 
-            return IDUser;
         }
 
         
-
-        public static User ValidateLogin(string username, string password)
-
+        public static List<Option> GetOptionsOfQuestions(DataTable dtQuestions)
         {
-            var query = "[dbo].[usp_validateLogin_GET]";
-            User user = null;
+            var query = "[dbo].[usp_OptionsOfQuestions_GET]";
+            List<Option> options = new List<Option>();
             try
             {
 
@@ -98,11 +98,10 @@ namespace Data
                     };
                     using (command.Connection)
                     {
-                        command.Parameters.Add("@pUserName", SqlDbType.VarChar).Value = username ;
-                        command.Parameters.Add("@pPassword", SqlDbType.VarChar).Value = password;
+                        command.Parameters.Add("@pdtQuestions", SqlDbType.Structured).Value = dtQuestions;
 
                         var reader = command.ExecuteReader();
-                        user = Converter<User>.ConvertDataSetToList(reader).FirstOrDefault();
+                        options = Converter<Option>.ConvertDataSetToList(reader);
                     }
                 }
 
@@ -111,14 +110,12 @@ namespace Data
             {
                 throw ex;
             }
-
-            return user;
+            return options;
         }
-
-        public static User ValidateToken(string token)
+        public static List<Question> GetQuestionsOfQuestionnaires(DataTable dtQuestionnaires)
         {
-            var query = "[dbo].[usp_validateToken_GET]";
-            User user = null;
+            var query = "[dbo].[usp_QuestionsOfQuestionnaires_GET]";
+            List<Question> questions = new List<Question>();
             try
             {
 
@@ -133,10 +130,10 @@ namespace Data
                     };
                     using (command.Connection)
                     {
-                        command.Parameters.Add("@pToken", SqlDbType.VarChar).Value = token;
+                        command.Parameters.Add("@pDTQuestionnaires", SqlDbType.Structured).Value = dtQuestionnaires;
 
                         var reader = command.ExecuteReader();
-                        user = Converter<User>.ConvertDataSetToList(reader).FirstOrDefault();
+                        questions = Converter<Question>.ConvertDataSetToList(reader);
                     }
                 }
 
@@ -145,12 +142,7 @@ namespace Data
             {
                 throw ex;
             }
-
-            return user;
+            return questions;
         }
-
-
-        
-
     }
 }

@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Converter.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="QuestionnaireData.cs" />
     <Compile Include="UserData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
