@@ -7,7 +7,7 @@ namespace Entities.response
 {
     public class question
     {
-        public int ID { get; set; }
+        public int IDQuestion { get; set; }
         public string Name { get; set; }
         public List<option> Options { get; set; }
     }

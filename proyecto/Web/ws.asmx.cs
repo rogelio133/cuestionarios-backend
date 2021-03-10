@@ -54,7 +54,7 @@ namespace Web
         }
 
         [WebMethod]
-        public Response GetQuestionnaire(string token, int id)
+        public Response GetQuestionnaire(string token, string code)
         {
             Response response = new Response();
             try
@@ -62,7 +62,7 @@ namespace Web
                 response.TokenOK = UserBusiness.isValidToken(token);
                 if (response.TokenOK)
                 {
-                    questionnaire item = QuestionnaireBusiness.getQuestionnaire(id);
+                    questionnaire item = QuestionnaireBusiness.getQuestionnaire(token,code);
                     if (item != null)
                     {
                         response.Success = true;

@@ -28,7 +28,7 @@ namespace Data
                     };
                     using (command.Connection)
                     {
-                        command.Parameters.Add("@piDUser", SqlDbType.VarChar).Value = iDUser;
+                        command.Parameters.Add("@piDUser", SqlDbType.Int).Value = iDUser;
 
                         var reader = command.ExecuteReader();
                         questionnaires = Converter<Questionnaire>.ConvertDataSetToList(reader);
@@ -43,6 +43,40 @@ namespace Data
 
             return questionnaires;
         }
+
+        public static Questionnaire GetQuestionnaire(string code)
+        {
+            var query = "[dbo].[usp_QuestionnaireByCode_GET]";
+            Questionnaire questionnaire = null;
+            try
+            {
+                using (var connection = new SqlConnection())
+                {
+                    connection.ConnectionString = Helper.GetConnection();
+                    connection.Open();
+                    var command = new SqlCommand(query)
+                    {
+                        Connection = connection,
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    using (command.Connection)
+                    {
+                        command.Parameters.Add("@pCode", SqlDbType.VarChar).Value = code;
+
+                        var reader = command.ExecuteReader();
+                        questionnaire = Converter<Questionnaire>.ConvertDataSetToList(reader).FirstOrDefault();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return questionnaire;
+        }
+        
         public static void Save(Questionnaire item, DataTable dtQuestions, DataTable dtOptions)
         {
             var query = "[dbo].[usp_SaveQuestionnaire_INS]";
@@ -112,9 +146,9 @@ namespace Data
             }
             return options;
         }
-        public static List<Question> GetQuestionsOfQuestionnaires(DataTable dtQuestionnaires)
+        public static List<Question> GetQuestionsOfQuestionnaire(int IDQuestionnaire)
         {
-            var query = "[dbo].[usp_QuestionsOfQuestionnaires_GET]";
+            var query = "[dbo].[usp_QuestionsInQuestionnaire_GET]";
             List<Question> questions = new List<Question>();
             try
             {
@@ -130,7 +164,7 @@ namespace Data
                     };
                     using (command.Connection)
                     {
-                        command.Parameters.Add("@pDTQuestionnaires", SqlDbType.Structured).Value = dtQuestionnaires;
+                        command.Parameters.Add("@pIDQuestionnaire", SqlDbType.Int).Value = IDQuestionnaire;
 
                         var reader = command.ExecuteReader();
                         questions = Converter<Question>.ConvertDataSetToList(reader);

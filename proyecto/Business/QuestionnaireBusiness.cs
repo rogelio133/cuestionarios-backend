@@ -11,40 +11,33 @@ namespace Business
 {
     public class QuestionnaireBusiness
     {
-        public static questionnaire getQuestionnaire(int ID)
+        public static questionnaire getQuestionnaire(string token,string code)
         {
-            Questionnaire item = new Questionnaire
-            {
-                IDQuestionnaire = 666,
-                Name = "Mini Test React",
-                Code = "133515",
-                Questions = new List<Question>
-                {
-                    new Question {IDQuestion=1,Name="Pregunta 1",Options= new List<Option> { new Option { IDQuestion=1,Name="Opcion 1", Correct= false },new Option { IDQuestion=2,Name="Opcion 2", Correct= false },new Option { IDQuestion=3,Name="Opcion 3", Correct= true },  }},
-                    new Question {IDQuestion=2,Name="Pregunta 2",Options= new List<Option> { new Option { IDQuestion=1,Name="Opcion a", Correct= false },new Option { IDQuestion=2,Name="Opcion b", Correct= false },new Option { IDQuestion=3,Name="Opcion c", Correct= true },  }}
-                }
-            };
+            int IDUser = UserBusiness.GetIDUser(token);
+            Questionnaire questionnaire = getQuestionnaireByCode(code);
+
+          
 
             //validar que la pregunta pertenezca al usuario en cuestion
 
             questionnaire respuesta = new questionnaire
             {
-                Name = item.Name,
-                Code = item.Code,
+                Name = questionnaire.Name,
+                Code = questionnaire.Code,
                 Questions = new List<question>()
             };
 
-            item.Questions.ForEach(q => {
+            questionnaire.Questions.ForEach(q => {
                 question question = new question
                 {
-                    ID = q.IDQuestion,
+                    IDQuestion = q.IDQuestion,
                     Name = q.Name,
                     Options = new List<option>()
                 };
 
                 q.Options.ForEach(o => {
-                    question.Options.Add(new option { 
-                        ID = o.IDOption,Name= o.Name, Correct = o.Correct
+                    question.Options.Add(new option {
+                        IDOption = o.IDOption,Name= o.Name, Correct = o.Correct
                     });
                 });
                 respuesta.Questions.Add(question);
@@ -53,32 +46,12 @@ namespace Business
            return respuesta;
         }
 
-        public static List<questionnaire> getQuestionnaires(string token)
+        public static Questionnaire getQuestionnaireByCode( string code)
         {
-            int IDUser = UserBusiness.GetIDUser(token);
+            Questionnaire questionnaire = QuestionnaireData.GetQuestionnaire(code);
 
-            List<Questionnaire> questionnaires = QuestionnaireData.GetQuestionnaires(IDUser);
-            
-            /*
-            List<Question> questions = new List<Question>();
+            List<Question> questions = QuestionnaireData.GetQuestionsOfQuestionnaire(questionnaire.IDQuestionnaire);
             List<Option> options = new List<Option>();
-
-            #region get questions
-
-            DataTable dtQuestionnaires = GetTable_Question();
-
-            questionnaires.ForEach(q => {
-                dtQuestionnaires.Rows.Add(q.IDQuestionnaire);
-            });
-
-            questions = QuestionnaireData.GetQuestionsOfQuestionnaires(dtQuestionnaires);
-
-            questionnaires.ForEach(q => {
-                q.Questions = questions.Where(question => question.IDQuestionnaire == q.IDQuestionnaire).ToList();
-            });
-
-            #endregion
-
 
             #region get options
 
@@ -94,22 +67,19 @@ namespace Business
                 question.Options = options.Where(o => o.IDQuestion == question.IDQuestion).ToList();
             });
 
+            questionnaire.Questions = questions;
+
             #endregion
 
-            Questionnaire item = new Questionnaire
-            {
-                IDQuestionnaire = 666,
-                Name = "Mini Test React",
-                Code = "133515",
-                NoQuestions = 2,
-                Questions = new List<Question>
-                {
-                    new Question {IDQuestion=1,Name="Pregunta 1",Options= new List<Option> { new Option { IDOption=1,Name="Opcion 1", Correct= false },new Option { IDOption=2,Name="Opcion 2", Correct= false },new Option { IDOption=3,Name="Opcion 3", Correct= true },  }},
-                    new Question {IDQuestion=2,Name="Pregunta 2",Options= new List<Option> { new Option { IDOption=1,Name="Opcion a", Correct= false },new Option { IDOption=2,Name="Opcion b", Correct= false },new Option { IDOption=3,Name="Opcion c", Correct= true },  }}
-                }
-            };
+            return questionnaire;
+        }
 
-           */
+        public static List<questionnaire> getQuestionnaires(string token)
+        {
+            int IDUser = UserBusiness.GetIDUser(token);
+
+            List<Questionnaire> questionnaires = QuestionnaireData.GetQuestionnaires(IDUser);
+           
             List<questionnaire> questionnairesResponse = questionnaires.Select(questionnaire => new questionnaire
             {
                 Name = questionnaire.Name,
@@ -141,37 +111,22 @@ namespace Business
 
 
         public static questionnaire ValidateCode(string code)
-        { 
-             
+        {
+            Questionnaire questionnaire = getQuestionnaireByCode(code);
             questionnaire respuesta = null;
 
-
-            if (code == "111111")
+            if(questionnaire != null)
             {
-                Questionnaire item = new Questionnaire
-                {
-                    IDQuestionnaire = 666,
-                    Name = "Mini Test React",
-                    Code = "133515",
-                    Questions = new List<Question>
-                {
-                    new Question {IDQuestion=1,Name="Pregunta 1",Options= new List<Option> { new Option { IDOption=10,Name="Opcion 1", Correct= false },new Option { IDOption=11,Name="Opcion 2", Correct= false },new Option { IDOption=13,Name="Opcion 3", Correct= true },  }},
-                    new Question {IDQuestion=2,Name="Pregunta 2",Options= new List<Option> { new Option { IDOption=20,Name="Opcion a", Correct= false },new Option { IDOption=21,Name="Opcion b", Correct= false },new Option { IDOption=23,Name="Opcion c", Correct= true },  }},
-                    new Question {IDQuestion=3,Name="Pregunta 3",Options= new List<Option> { new Option { IDOption=30,Name="Opcion x", Correct= false },new Option { IDOption=31,Name="Opcion y", Correct= false },new Option { IDOption=33,Name="Opcion z", Correct= true },  }}
-
-                }
-                };
-
                 respuesta = new questionnaire
                 {
-                     Name = item.Name,
+                     Name = questionnaire.Name,
                     Questions = new List<question>()
                 };
 
-                item.Questions.ForEach(q => {
+                questionnaire.Questions.ForEach(q => {
                     question question = new question
                     {
-                        ID = q.IDQuestion,
+                        IDQuestion = q.IDQuestion,
                         Name = q.Name,
                         Options = new List<option>()
                     };
@@ -179,7 +134,7 @@ namespace Business
                     q.Options.ForEach(o => {
                         question.Options.Add(new option
                         {
-                            ID = o.IDOption,
+                            IDOption = o.IDOption,
                             Name = o.Name
                         });
                     });
