@@ -48,6 +48,8 @@
     <Compile Include="QuestionnaireAnswer.cs" />
     <Compile Include="QuestionnaireAnswersDetail.cs" />
     <Compile Include="Response.cs" />
+    <Compile Include="response\answers.cs" />
+    <Compile Include="response\AnswerStats.cs" />
     <Compile Include="response\option.cs" />
     <Compile Include="response\question.cs" />
     <Compile Include="response\questionnaire.cs" />

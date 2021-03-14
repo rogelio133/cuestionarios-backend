@@ -10,5 +10,6 @@ namespace Entities.response
         public int IDQuestion { get; set; }
         public string Name { get; set; }
         public List<option> Options { get; set; }
+
     }
 }

@@ -12,7 +12,8 @@ namespace Entities
         public int NoQuestions { get; set; }
 
         public List<Question> Questions { get; set; }
+        public List<QuestionnaireAnswer> answers { get; set; }
 
-            //generar un uuid como llave
+        //generar un uuid como llave
     }
 }

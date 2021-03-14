@@ -11,5 +11,7 @@ namespace Entities.response
         public string Code { get; set; }
         public int NoQuestions { get; set; }
         public List<question> Questions { get; set; }
+        public List<answers> Exams { get; set; }
+        
     }
 }

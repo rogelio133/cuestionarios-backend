@@ -29,7 +29,7 @@ namespace Web
             {
                 User userLogged = UserBusiness.ValidateLogin(user, password);
 
-                if (user == null)
+                if (userLogged == null)
                     response.Message = "Datos incorrectos";
                 else if (userLogged.IDStatus == (int)Enums.UserStatus.Disabled)
                     response.Message = "Su cuenta esta inactiva";
@@ -73,10 +73,15 @@ namespace Web
 
                 response.Success = true;
             }
+            catch(ApplicationException aex)
+            {
+                response.Success = false;
+                response.Message = aex.Message;
+            }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = "No se pudo procesar su solicitud";
+                response.Message = "No se pudo procesar su solicitud. Intente nuevamente";
             }
 
             return response;
@@ -136,11 +141,12 @@ namespace Web
         }
 
         [WebMethod]
-        public object SaveQuestionnaireAnswer(QuestionnaireAnswer answer)
+        public object SaveQuestionnaireAnswer(string code,QuestionnaireAnswer exam)
         {
             Response response = new Response();
             try
             {
+                response.Data = QuestionnaireBusiness.SaveQuestionnaireAnswer(code, exam);
                 response.Success = true;
             }
             catch (Exception ex)
