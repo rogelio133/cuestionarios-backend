@@ -10,6 +10,7 @@ namespace Entities
         public string Name { get; set; }
         public string Code { get; set; }
         public int NoQuestions { get; set; }
+        public int Answers { get; set; }
 
         public List<Question> Questions { get; set; }
         public List<QuestionnaireAnswer> answers { get; set; }

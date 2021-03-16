@@ -109,7 +109,8 @@ namespace Business
             {
                 Name = questionnaire.Name,
                 Code = questionnaire.Code,
-                NoQuestions = questionnaire.NoQuestions
+                NoQuestions = questionnaire.NoQuestions,
+                Answers = questionnaire.Answers
             }).ToList();
 
             return questionnairesResponse;

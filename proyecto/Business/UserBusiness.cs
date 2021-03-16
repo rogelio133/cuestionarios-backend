@@ -23,7 +23,7 @@ namespace Business
             return UserData.GetIDUser(token);
         }
 
-        public static bool isValidToken(string token)
+        public static bool IsValidToken(string token)
         {
             User user = UserData.ValidateToken(token);
 
@@ -31,6 +31,12 @@ namespace Business
 
             return user != null && user.IDStatus == (int)Enums.UserStatus.Enabled;
         }
+
+        public static bool IsValidUser(string user)
+        {
+            throw new NotImplementedException();
+        } 
+
         public static User ValidateLogin(string username, string password)
         {
             User user = UserData.ValidateLogin(username, password);

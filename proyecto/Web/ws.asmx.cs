@@ -20,21 +20,20 @@ namespace Web
     [System.Web.Script.Services.ScriptService]
     public class ws : System.Web.Services.WebService
     {
-
         [WebMethod]
-        public Response ValidateLogin(string user, string password)
+        public Response CreateAccount(string user, string password)
         {
             Response response = new Response();
             try
             {
-                User userLogged = UserBusiness.ValidateLogin(user, password);
 
-                if (userLogged == null)
-                    response.Message = "Datos incorrectos";
-                else if (userLogged.IDStatus == (int)Enums.UserStatus.Disabled)
-                    response.Message = "Su cuenta esta inactiva";
+                User userLogged;
+
+                if (UserBusiness.IsValidUser(user))
+                    response.Message = "El email especificado no esta disponible";
                 else
                 {
+                    userLogged = UserBusiness.CreateAccount(user, password);
                     response.Success = true;
                     response.Data = new
                     {
@@ -125,7 +124,7 @@ namespace Web
                     QuestionnaireBusiness.Save(questionnaire, token);
                     response.Data = new
                     {
-                        questionnaireID = questionnaire.IDQuestionnaire
+                        questionnaireID = questionnaire.Code
                     };
                 }
 
@@ -185,8 +184,37 @@ namespace Web
             return response;
         }
 
-        
+        [WebMethod]
+        public Response ValidateLogin(string user, string password)
+        {
+            Response response = new Response();
+            try
+            {
+                User userLogged = UserBusiness.ValidateLogin(user, password);
 
+                if (userLogged == null)
+                    response.Message = "Datos incorrectos";
+                else if (userLogged.IDStatus == (int)Enums.UserStatus.Disabled)
+                    response.Message = "Su cuenta esta inactiva";
+                else
+                {
+                    response.Success = true;
+                    response.Data = new
+                    {
+                        name = userLogged.Name,
+                        token = userLogged.Token,
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "No se pudo procesar su solicitud";
+
+            }
+
+            return response;
+        }
 
     }
 }
