@@ -13,6 +13,7 @@ namespace Entities
         public string Token { get; set; }
         public DateTime DateLastLogin { get; set; }
         public int IDStatus { get; set; }
+        public string UserName { get; set; }
         public DateTime DateLastPasswordChange { get; set; }
     }
 }

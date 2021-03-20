@@ -21,24 +21,24 @@ namespace Web
     public class ws : System.Web.Services.WebService
     {
         [WebMethod]
-        public Response CreateAccount(string user, string password)
+        public Response CreateAccount(string username,string name ,string password)
         {
             Response response = new Response();
             try
             {
 
-                User userLogged;
+                User user;
 
-                if (UserBusiness.IsValidUser(user))
+                if (UserBusiness.IsValidUser(username))
                     response.Message = "El email especificado no esta disponible";
                 else
                 {
-                    userLogged = UserBusiness.CreateAccount(user, password);
+                    string token = UserBusiness.CreateAccount(username,name ,password);
                     response.Success = true;
                     response.Data = new
                     {
-                        name = userLogged.Name,
-                        token = userLogged.Token,
+                        name = name,
+                        token = token,
                     };
                 }
             }
@@ -58,7 +58,7 @@ namespace Web
             Response response = new Response();
             try
             {
-                response.TokenOK = UserBusiness.isValidToken(token);
+                response.TokenOK = UserBusiness.IsValidToken(token);
                 if (response.TokenOK)
                 {
                     questionnaire item = QuestionnaireBusiness.getQuestionnaire(token,code);
@@ -92,7 +92,8 @@ namespace Web
             Response response = new Response();
             try
             {
-                response.TokenOK = UserBusiness.isValidToken(token);
+                
+                response.TokenOK = UserBusiness.IsValidToken(token);
                 if (response.TokenOK)
                 {
                     List<questionnaire> items = QuestionnaireBusiness.getQuestionnaires(token);
@@ -118,7 +119,7 @@ namespace Web
             Response response = new Response();
             try
             {
-                response.TokenOK = UserBusiness.isValidToken(token);
+                response.TokenOK = UserBusiness.IsValidToken(token);
                 if (response.TokenOK)
                 {
                     QuestionnaireBusiness.Save(questionnaire, token);
