@@ -10,5 +10,6 @@ namespace Entities.response
         public int IDOption { get; set; }
         public string Name { get; set; }
         public bool Correct { get; set; }
+        public bool Selected { get; set; }
     }
 }

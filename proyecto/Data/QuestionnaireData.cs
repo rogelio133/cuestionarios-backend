@@ -10,10 +10,10 @@ namespace Data
 {
     public static class QuestionnaireData
     {
-        public static Questionnaire GetQuestionnaire(string code)
+        public static int? GetIDQuestionnaireByCode(string code)
         {
-            var query = "[dbo].[usp_QuestionnaireByCode_GET]";
-            Questionnaire questionnaire = null;
+            var query = "[dbo].[usp_IDQuestionnaireByCode_GET]";
+            int? ID = null;
             try
             {
                 using (var connection = new SqlConnection())
@@ -29,6 +29,39 @@ namespace Data
                     {
                         command.Parameters.Add("@pCode", SqlDbType.VarChar).Value = code;
 
+                        object result = command.ExecuteScalar();
+
+                        ID = DBNull.Value.Equals(result) ? new int?() : Convert.ToInt32(result);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return ID;
+        }
+        public static Questionnaire GetQuestionnaire( int IDQuestionnaire)
+        {
+            var query = "[dbo].[usp_QuestionnaireByID_GET]";
+            Questionnaire questionnaire = null;
+            try
+            {
+                using (var connection = new SqlConnection())
+                {
+                    connection.ConnectionString = Helper.GetConnection();
+                    connection.Open();
+                    var command = new SqlCommand(query)
+                    {
+                        Connection = connection,
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    using (command.Connection)
+                    {
+                        command.Parameters.Add("@pIDQuestionnaire", SqlDbType.Int).Value = IDQuestionnaire;
+
                         var reader = command.ExecuteReader();
                         questionnaire = Converter<Questionnaire>.ConvertDataSetToList(reader).FirstOrDefault();
                     }
@@ -42,6 +75,40 @@ namespace Data
 
             return questionnaire;
         }
+
+        public static List<QuestionnaireAnswersDetail> GetQuestionnaireAnswerDetails(int IDAnswer)
+        {
+            var query = "[dbo].[usp_QuestionnaireAnswerDetail_GET]";
+            List<QuestionnaireAnswersDetail> answers = new List<QuestionnaireAnswersDetail>();
+            try
+            {
+                using (var connection = new SqlConnection())
+                {
+                    connection.ConnectionString = Helper.GetConnection();
+                    connection.Open();
+                    var command = new SqlCommand(query)
+                    {
+                        Connection = connection,
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    using (command.Connection)
+                    {
+                        command.Parameters.Add("@pIDAnswer", SqlDbType.Int).Value = IDAnswer;
+
+                        var reader = command.ExecuteReader();
+                        answers = Converter<QuestionnaireAnswersDetail>.ConvertDataSetToList(reader);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return answers;
+        }
+        
 
         public static List<Questionnaire> GetQuestionnaires(int iDUser)
         {
@@ -76,7 +143,38 @@ namespace Data
 
             return questionnaires;
         }
-        
+
+        public static QuestionnaireAnswer GetAnswer(int IDAnswer)
+        {
+            var query = "[dbo].[usp_QuestionnaireAnswerByID_GET]";
+            QuestionnaireAnswer answer = new QuestionnaireAnswer();
+            try
+            {
+                using (var connection = new SqlConnection())
+                {
+                    connection.ConnectionString = Helper.GetConnection();
+                    connection.Open();
+                    var command = new SqlCommand(query)
+                    {
+                        Connection = connection,
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    using (command.Connection)
+                    {
+                        command.Parameters.Add("@pIDAnswer", SqlDbType.Int).Value = IDAnswer;
+
+                        var reader = command.ExecuteReader();
+                        answer = Converter<QuestionnaireAnswer>.ConvertDataSetToList(reader).FirstOrDefault();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return answer;
+        }
         public static List<QuestionnaireAnswer> GetAnswers(int iDQuestionnaire)
         {
             var query = "[dbo].[usp_QuestionnaireAnswers_GET]";

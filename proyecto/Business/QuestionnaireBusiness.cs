@@ -11,7 +11,7 @@ namespace Business
 {
     public class QuestionnaireBusiness
     {
-        public static questionnaire getQuestionnaire(string token,string code)
+        public static questionnaire getQuestionnaire(string token, string code)
         {
             int IDUser = UserBusiness.GetIDUser(token);
             Questionnaire _questionnaire = getQuestionnaireByCode(code);
@@ -21,8 +21,8 @@ namespace Business
                 string error = string.Format("Questionnaire '{0}' doesn't exists. IDuser : {1}", code, IDUser);
                 throw new ApplicationException("El cuestionario solicitado no esta disponible");
             }
-                
-            if(_questionnaire.IDUser != IDUser)
+
+            if (_questionnaire.IDUser != IDUser)
             {
                 string error = string.Format("Questionnaire '{0}' isn't valid for IDuser : {1}", code, IDUser);
                 throw new ApplicationException("El cuestionario solicitado no esta disponible");
@@ -37,7 +37,8 @@ namespace Business
                 Questions = new List<question>()
             };
 
-            _questionnaire.Questions.ForEach(q => {
+            _questionnaire.Questions.ForEach(q =>
+            {
                 question question = new question
                 {
                     IDQuestion = q.IDQuestion,
@@ -45,16 +46,21 @@ namespace Business
                     Options = new List<option>()
                 };
 
-                q.Options.ForEach(o => {
-                    question.Options.Add(new option {
-                        IDOption = o.IDOption,Name= o.Name, Correct = o.Correct
+                q.Options.ForEach(o =>
+                {
+                    question.Options.Add(new option
+                    {
+                        IDOption = o.IDOption,
+                        Name = o.Name,
+                        Correct = o.Correct
                     });
                 });
                 respuesta.Questions.Add(question);
             });
 
-            respuesta.Exams = _questionnaire.answers.Select((a,index) => new answers { 
-                ID = index,
+            respuesta.Exams = _questionnaire.answers.Select((a, index) => new answers
+            {
+                ID = a.IDAnswer,
                 Name = a.Name,
                 AnswersCorrect = a.AnswersCorrect,
                 AnswersFailed = a.AnswersFailed,
@@ -63,38 +69,47 @@ namespace Business
                 Time = a.sTime
             }).ToList();
 
-           return respuesta;
+            return respuesta;
         }
 
-        public static Questionnaire getQuestionnaireByCode( string code)
+        public static Questionnaire getQuestionnaireByCode(string code)
         {
-            Questionnaire questionnaire = QuestionnaireData.GetQuestionnaire(code);
+            int? IDQuestionnaire = QuestionnaireData.GetIDQuestionnaireByCode(code);
+            Questionnaire questionnaire = null; 
 
-            if(questionnaire!= null)
+            if (IDQuestionnaire != null)
             {
-                List<Question> questions = QuestionnaireData.GetQuestionsOfQuestionnaire(questionnaire.IDQuestionnaire);
-                List<Option> options = new List<Option>();
-
-                #region get options
-
-                DataTable dtQuestions = GetTable_Question();
-
-                questions.ForEach(q => {
-                    dtQuestions.Rows.Add(q.IDQuestion, "");
-                });
-
-                options = QuestionnaireData.GetOptionsOfQuestions(dtQuestions);
-
-                questions.ForEach(question => {
-                    question.Options = options.Where(o => o.IDQuestion == question.IDQuestion).ToList();
-                });
-
-                questionnaire.Questions = questions;
-
-                #endregion
+                questionnaire = getQuestionnaireByID(IDQuestionnaire.Value);
             }
 
+            return questionnaire;
+        }
 
+        private static Questionnaire getQuestionnaireByID(int IDQuestionnaire)
+        {
+            Questionnaire questionnaire = QuestionnaireData.GetQuestionnaire(IDQuestionnaire);
+            List<Question> questions = QuestionnaireData.GetQuestionsOfQuestionnaire(questionnaire.IDQuestionnaire);
+            List<Option> options = new List<Option>();
+
+            #region get options
+
+            DataTable dtQuestions = GetTable_Question();
+
+            questions.ForEach(q =>
+            {
+                dtQuestions.Rows.Add(q.IDQuestion, "");
+            });
+
+            options = QuestionnaireData.GetOptionsOfQuestions(dtQuestions);
+
+            questions.ForEach(question =>
+            {
+                question.Options = options.Where(o => o.IDQuestion == question.IDQuestion).ToList();
+            });
+
+            questionnaire.Questions = questions;
+
+            #endregion
 
             return questionnaire;
         }
@@ -104,7 +119,7 @@ namespace Business
             int IDUser = UserBusiness.GetIDUser(token);
 
             List<Questionnaire> questionnaires = QuestionnaireData.GetQuestionnaires(IDUser);
-           
+
             List<questionnaire> questionnairesResponse = questionnaires.Select(questionnaire => new questionnaire
             {
                 Name = questionnaire.Name,
@@ -121,36 +136,88 @@ namespace Business
             item.IDUser = UserBusiness.GetIDUser(token);
             item.Code = CreateRandom(6);
             item.NoQuestions = item.Questions.Count;
-            
+
             DataTable dtQuestions = GetTable_Question();
             DataTable dtOptions = GetTable_Option();
 
-            item.Questions.ForEach(q => {
-                dtQuestions.Rows.Add(0,q.Name);
-                q.Options.ForEach(o => {
-                    dtOptions.Rows.Add(q.Name,o.Name,o.Correct);
+            item.Questions.ForEach(q =>
+            {
+                dtQuestions.Rows.Add(0, q.Name);
+                q.Options.ForEach(o =>
+                {
+                    dtOptions.Rows.Add(q.Name, o.Name, o.Correct);
                 });
             });
 
             QuestionnaireData.Save(item, dtQuestions, dtOptions);
         }
 
+        public static object SaveQuestionnaireAnswer(string code, QuestionnaireAnswer exam)
+        {
+            Questionnaire questionnaire = getQuestionnaireByCode(code);
+
+            int answersCorrect = 0;
+
+            List<question> userQuestions = GetDetailAnswer(questionnaire.Questions,exam.Answers);
+
+          
+            questionnaire.Questions.ForEach(q =>
+            {
+                QuestionnaireAnswersDetail questionAnswer = exam.Answers.First(a => a.IDQuestion == q.IDQuestion);
+                bool isCorrect = q.Options.First(o => o.Correct).IDOption == questionAnswer.IDOptionSelected;
+
+                if (isCorrect)
+                {
+                    answersCorrect++;
+                }
+               
+            });
+
+            exam.IDQuestionnaire = questionnaire.IDQuestionnaire;
+            exam.AnswersCorrect = answersCorrect;
+            exam.AnswersFailed = questionnaire.Questions.Count - answersCorrect;
+            exam.Score = (100 * answersCorrect) / questionnaire.Questions.Count;
+
+            DataTable tdDetail = GetTable_QuestionnaireAnswersDetail();
+
+            exam.Answers.ForEach(a =>
+            {
+                tdDetail.Rows.Add(a.IDQuestion, a.IDOptionSelected);
+            });
+
+            QuestionnaireData.SaveQuestionnaireAnswer(exam, tdDetail);
+
+            List<AnswerStats> stats = new List<AnswerStats> {
+                new AnswerStats {ID=1, Description="# ACIERTOS",Value=exam.AnswersCorrect.ToString()},
+                new AnswerStats {ID=2,Description="# FALLAS",Value=exam.AnswersFailed.ToString()},
+                new AnswerStats {ID=3,Description="CALIFICACIÓN",Value=exam.Score.ToString()},
+                new AnswerStats {ID=4,Description="TIEMPO",Value= string.Format("{0} min", (int)(exam.Time/60000)  )},
+            };
+
+            return new
+            {
+                stats,
+                userQuestions
+            };
+
+        }
 
         public static questionnaire ValidateCode(string code)
         {
             Questionnaire questionnaire = getQuestionnaireByCode(code);
             questionnaire respuesta = null;
 
-            if(questionnaire != null)
+            if (questionnaire != null)
             {
                 respuesta = new questionnaire
                 {
-                     Name = questionnaire.Name,
-                     Code = questionnaire.Code,
+                    Name = questionnaire.Name,
+                    Code = questionnaire.Code,
                     Questions = new List<question>()
                 };
 
-                questionnaire.Questions.ForEach(q => {
+                questionnaire.Questions.ForEach(q =>
+                {
                     question question = new question
                     {
                         IDQuestion = q.IDQuestion,
@@ -158,7 +225,8 @@ namespace Business
                         Options = new List<option>()
                     };
 
-                    q.Options.ForEach(o => {
+                    q.Options.ForEach(o =>
+                    {
                         question.Options.Add(new option
                         {
                             IDOption = o.IDOption,
@@ -173,7 +241,10 @@ namespace Business
             return respuesta;
         }
 
-       
+
+
+
+
 
         private static string CreateRandom(int length)
         {
@@ -193,6 +264,58 @@ namespace Business
             return answers;
         }
 
+        private static QuestionnaireAnswer GetAnswer(int IDAnswer)
+        {
+            QuestionnaireAnswer exam = QuestionnaireData.GetAnswer(IDAnswer);
+
+            exam.Answers = QuestionnaireData.GetQuestionnaireAnswerDetails(IDAnswer);
+
+            return exam;
+        }
+        public  static List<question> GetDetailAnswer(int IDAnswer)
+        {
+            QuestionnaireAnswer exam = GetAnswer(IDAnswer);
+
+            if (exam == null)
+            {
+                throw new ApplicationException("La información solicitada no esta disponible");
+            }
+
+            Questionnaire questionnaire = getQuestionnaireByID(exam.IDQuestionnaire);
+
+            return GetDetailAnswer(questionnaire.Questions, exam.Answers);
+        }
+        private static List<question> GetDetailAnswer(List<Question> questions, List<QuestionnaireAnswersDetail> Answers)
+        {
+            List<question> examQuestions = new List<question>();
+
+            int x = 1;
+            questions.ForEach(q =>
+            {
+                QuestionnaireAnswersDetail questionAnswer = Answers.First(a => a.IDQuestion == q.IDQuestion);
+                bool isCorrect = q.Options.First(o => o.Correct).IDOption == questionAnswer.IDOptionSelected;
+
+                List<option> options = new List<option>();
+                int y = 1;
+                q.Options.ForEach(o =>
+                {
+                    options.Add(new option
+                    {
+                        IDOption = y,
+                        Name = o.Name,
+                        Selected = questionAnswer.IDOptionSelected == o.IDOption,
+                        Correct = o.Correct
+                    });
+                    y++;
+                });
+
+                examQuestions.Add(new question { IDQuestion = x, Name = q.Name, Correct = isCorrect, Options = options });
+
+                x++;
+            });
+
+            return examQuestions;
+        }
 
         private static DataTable GetTable_Option()
         {
@@ -224,46 +347,6 @@ namespace Business
 
 
             return Table_QuestionnaireAnswersDetail;
-        }
-
-        public static List<AnswerStats> SaveQuestionnaireAnswer(string code, QuestionnaireAnswer exam)
-        {
-            Questionnaire questionnaire = getQuestionnaireByCode(code);
-
-            int answersCorrect = 0;
-            questionnaire.Questions.ForEach(q => {
-
-                QuestionnaireAnswersDetail questionAnswer = exam.Answers.First(a => a.IDQuestion == q.IDQuestion);
-                bool isCorrect = q.Options.First(o => o.Correct).IDOption == questionAnswer.IDOptionSelected;
-
-                if(isCorrect)
-                {
-                    answersCorrect++;
-                }
-            });
-
-            exam.IDQuestionnaire = questionnaire.IDQuestionnaire;
-            exam.AnswersCorrect = answersCorrect;
-            exam.AnswersFailed = questionnaire.Questions.Count - answersCorrect;
-            exam.Score = (100 * answersCorrect) / questionnaire.Questions.Count;
-
-            DataTable tdDetail = GetTable_QuestionnaireAnswersDetail();
-
-            exam.Answers.ForEach(a=> {
-                tdDetail.Rows.Add(a.IDQuestion,a.IDOptionSelected);
-            });
-
-            QuestionnaireData.SaveQuestionnaireAnswer(exam, tdDetail);
-
-            List<AnswerStats> stats = new List<AnswerStats> {
-                new AnswerStats {ID=1, Description="# ACIERTOS",Value=exam.AnswersCorrect.ToString()},
-                new AnswerStats {ID=2,Description="# FALLAS",Value=exam.AnswersFailed.ToString()},
-                new AnswerStats {ID=3,Description="CALIFICACIÓN",Value=exam.Score.ToString()},
-                new AnswerStats {ID=4,Description="TIEMPO",Value= string.Format("{0} min", (int)(exam.Time/60000)  )},
-            };
-
-            return stats;
-
         }
 
     }

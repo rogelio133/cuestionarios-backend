@@ -53,6 +53,33 @@ namespace Web
         }
 
         [WebMethod]
+        public Response GetDetailAnswer(string token, int IDExam)
+        {
+            Response response = new Response();
+            try
+            {
+                response.TokenOK = UserBusiness.IsValidToken(token);
+                if (response.TokenOK)
+                {
+                    response.Data = QuestionnaireBusiness.GetDetailAnswer(IDExam);
+                }
+
+                response.Success = true;
+            }
+            catch (ApplicationException aex)
+            {
+                response.Success = false;
+                response.Message = aex.Message;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "No se pudo procesar su solicitud. Intente nuevamente";
+            }
+
+            return response;
+        }
+        [WebMethod]
         public Response GetQuestionnaire(string token, string code)
         {
             Response response = new Response();
@@ -64,10 +91,8 @@ namespace Web
                     questionnaire item = QuestionnaireBusiness.getQuestionnaire(token,code);
                     if (item != null)
                     {
-                        response.Success = true;
                         response.Data = item;
                     }
-
                 }
 
                 response.Success = true;
